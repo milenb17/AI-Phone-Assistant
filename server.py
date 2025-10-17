@@ -5,18 +5,8 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import PlainTextResponse
 
-# Import TwilioHandler class - handle both module and package use cases
-if TYPE_CHECKING:
-    # For type checking, use the relative import
-    from .twilio_handler import TwilioHandler
-else:
-    # At runtime, try both import styles
-    try:
-        # Try relative import first (when used as a package)
-        from .twilio_handler import TwilioHandler
-    except ImportError:
-        # Fall back to direct import (when run as a script)
-        from twilio_handler import TwilioHandler
+# Import TwilioHandler class when running server.py directly
+from twilio_handler import TwilioHandler
 
 
 class TwilioWebSocketManager:
