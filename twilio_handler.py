@@ -5,38 +5,17 @@ import base64
 import json
 import os
 import time
-from datetime import datetime
 from typing import Any
 
 from fastapi import WebSocket
 
-from agents import function_tool
 from agents.realtime import (
-    RealtimeAgent,
     RealtimePlaybackTracker,
     RealtimeRunner,
     RealtimeSession,
     RealtimeSessionEvent,
 )
-
-
-@function_tool
-def get_weather(city: str) -> str:
-    """Get the weather in a city."""
-    return f"The weather in {city} is sunny."
-
-
-@function_tool
-def get_current_time() -> str:
-    """Get the current time."""
-    return f"The current time is {datetime.now().strftime('%H:%M:%S')}"
-
-
-agent = RealtimeAgent(
-    name="Twilio Assistant",
-    instructions="You are a helpful assistant that starts every conversation with a creative greeting. Keep responses concise and friendly since this is a phone conversation.",
-    tools=[get_weather, get_current_time],
-)
+from custom_agents import triage_agent
 
 
 class TwilioHandler:
@@ -63,7 +42,7 @@ class TwilioHandler:
 
     async def start(self) -> None:
         """Start the session."""
-        runner = RealtimeRunner(agent)
+        runner = RealtimeRunner(triage_agent)
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY environment variable is required")
