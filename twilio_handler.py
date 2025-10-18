@@ -14,16 +14,17 @@ from agents.realtime import (
     RealtimeRunner,
     RealtimeSession,
     RealtimeSessionEvent,
+    RealtimeAgent
 )
 from custom_agents import triage_agent
 
 
 class TwilioHandler:
     def __init__(self, twilio_websocket: WebSocket):
+        self.count = 0
         self.twilio_websocket = twilio_websocket
         self._message_loop_task: asyncio.Task[None] | None = None
         self.session: RealtimeSession | None = None
-        self.playback_tracker = RealtimePlaybackTracker()
 
         # Audio buffering configuration (matching CLI demo)
         self.CHUNK_LENGTH_S = 0.05  # 50ms chunks like CLI demo
@@ -58,8 +59,7 @@ class TwilioHandler:
                         "interrupt_response": True,
                         "create_response": True,
                     },
-                },
-                "playback_tracker": self.playback_tracker,
+                }
             }
         )
 
@@ -100,6 +100,7 @@ class TwilioHandler:
 
     async def _handle_realtime_event(self, event: RealtimeSessionEvent) -> None:
         """Handle events from the realtime session."""
+        print(f"Event Type: {event.type}")
         if event.type == "audio":
             base64_audio = base64.b64encode(event.audio.data).decode("utf-8")
             await self.twilio_websocket.send_text(
@@ -139,7 +140,11 @@ class TwilioHandler:
         elif event.type == "audio_end":
             print("Audio end")
         elif event.type == "raw_model_event":
-            pass
+            self.count += 1
+            if self.count == 1:
+              print(event.data)
+            else:
+                print(self.count)
         else:
             pass
 
